@@ -87,43 +87,19 @@ const sortedDates = computed(() => {
   return range;
 };
 
-// esta computada nos da el rango de días a mostrar en la línea de tiempo
 const rangeOfDays = computed(() => {
   console.log(rangeOfDays);
   
-  const travelStartDate = new Date(travelPeriodStart.value); 
   const travelEndDate = new Date(travelPeriodEnd.value);
   const bookingStartDate = new Date(bookingWindowStart.value);
 
-  
   const startDate = new Date(bookingStartDate);
   startDate.setDate(startDate.getDate() - travelPeriodPreviousDays.value);
 
   const endDate = new Date(travelEndDate);
   endDate.setDate(endDate.getDate() + travelPeriodPostDays.value);
-   
   
-  
-  // const bookingRange = getRangeOfDays(bookingStartDate, bookingEndDate);
-  // const travelRange = getRangeOfDays(startDate, endDate);
-
-  const fullRange = getRangeOfDays(startDate, endDate); // Aquí usas la función getRangeOfDays
-
-  // let fullRange = [...travelRange, ...bookingRange];
-  // fullRange = fullRange.map(date => new Date(date));
-
-  // fullRange = fullRange.filter((value, index, self) => 
-  //   self.findIndex(date => 
-  //     date.getDate() === value.getDate() && 
-  //     date.getMonth() === value.getMonth() && 
-  //     date.getFullYear() === value.getFullYear()) === index
-  // );
-  // fullRange = fullRange.filter(date => {
-  //   return !(
-  //     date >= bookingStartDate && date <= bookingEndDate && 
-  //     (date >= startDate && date <= endDate) 
-  //   );
-  // });
+  const fullRange = getRangeOfDays(startDate, endDate); 
 
   const uniqueRange = fullRange.filter((value, index, self) => 
     self.findIndex(date => 
@@ -134,12 +110,33 @@ const rangeOfDays = computed(() => {
 
   uniqueRange.sort((a, b) => a.getTime() - b.getTime());
   return uniqueRange.map(date => formatDateTimeline(date));
- 
-  // fullRange.sort((a, b) => a.getTime() - b.getTime());
-  // console.log("Rango ordenado:", fullRange);
-  // return fullRange.map((date) =>formatDateTimeline(date) );
- 
+  
 });
+
+const formattedRangeOfDays = computed(() => {
+  return rangeOfDays.value.map((dateString: string, index: number, array: string[]) => {
+    const date = new Date(dateString); // Convertir string a Date
+    if (isNaN(date.getTime())) {
+      console.warn("Fecha inválida detectada:", dateString);
+      return null; // Si la fecha es inválida, evitamos errores
+    }
+
+    return {
+      day: date.getDate(), // Número del día
+      month: date.toLocaleString('es-ES', { month: 'long' }), // Mes en español
+      position: (index / (array.length - 1)) * 100 // Posición en porcentaje
+    };
+  }).filter(Boolean); // Filtramos valores nulos
+});
+
+
+const isFirstDayOfMonth = (index: number): boolean => {
+  if (index === 0) return true; // Siempre mostrar el primer mes
+  return (
+    formattedRangeOfDays.value[index].month !==
+    formattedRangeOfDays.value[index - 1].month
+  );
+};
 
 // Calcular la posición de la barra de la reserva (día de la reserva)
 const bookingStartPosition = computed(() => {
@@ -166,40 +163,62 @@ const travelStartPosition = computed(() => {
 <template>
 
 <div class="timeline-container">
-    <!-- Timeline Line -->
-    <div class="timeline-line">
-      <!-- Dinámicamente se agregarán los días numerados -->
-      <div v-for="day in rangeOfDays" :key="day" class="timeline-day">
-        <span class="day-label">{{ day }}</span>  
+  <!-- Línea de tiempo -->
+  <div class="timeline-line">
+    <!-- Iterar sobre los días de la línea de tiempo -->
+    <div 
+      v-for="(day, index) in rangeOfDays" 
+      :key="index" 
+      class="timeline-day"
+    >
+    <span 
+  class="day-label" 
+  :class="{ hide: index % 2 !== 0 }"
+>
+  {{ day }}
+</span>
+    </div>
+
+    <!-- Contenedor de los meses -->
+    <div class="timeline-months">
+      <div 
+        v-for="(day, index) in formattedRangeOfDays " 
+        :key="'month-' + index"
+        v-if="isFirstDayOfMonth(0)"
+        class="month-label"
+        :style="{ left: day.position + '%' }"
+      >
+        {{ day.month }}
       </div>
     </div>
-    
-    <!-- Barra azul para la fecha de la reserva -->
-    <div 
-      v-if="bookingWindowStart" 
-      class="timeline-bar timeline-bar-booking" 
-      :style="{ left: bookingStartPosition + '%' }"
-    ></div>
-    
-    <!-- Barra azul para el período del viaje -->
-    <div 
-      v-if="travelPeriodStart" 
-      class="timeline-bar timeline-bar-travel" 
-      :style="{ left: travelStartPosition + '%', width:  + '%' }"
-    ></div>
+  </div> <!-- Cierre correcto de .timeline-line -->
 
-      <!-- Mostrar las fechas formateadas debajo de la línea
-      <div v-for="(event, index) in sortedDates" :key="index" class="event-label">
-      <span>{{ formatDate(event.date) }}</span>
-    </div> -->
+  <!-- Barra de la reserva -->
+  <div 
+    v-if="bookingWindowStart" 
+    class="timeline-bar timeline-bar-booking" 
+    :style="{ left: bookingStartPosition + '%' }"
+  ></div>
 
-  </div>
+  <!-- Barra del viaje -->
+  <div 
+    v-if="travelPeriodStart" 
+    class="timeline-bar timeline-bar-travel" 
+    :style="{ left: travelStartPosition + '%', width:  + '%' }"
+  ></div>
+</div> <!-- Cierre correcto de .timeline-container -->
+
+
+
+
+
+
 
   <div class="timeline">
   <div v-for="dates in sortedDates" :key="dates.label">
     <strong>{{ dates.label }}</strong> {{ formatDate(dates.date) }}
   </div>
-</div>
+  </div>
 
 </template>
 
@@ -207,13 +226,17 @@ const travelStartPosition = computed(() => {
 
 
 
-<style  scoped>
+
+<style scoped>
 
 .timeline-container {
   position: relative;
   width: 100%;
   height: 100px;
+  padding: 20px;
+  background-color: #f0f0f0;
 }
+
 
 .timeline-line {
   position: absolute;
@@ -227,31 +250,69 @@ const travelStartPosition = computed(() => {
   padding: 0 10px;
 }
 
+/* rayas */
 .timeline-day {
   position: relative;
-  height: 10px;
+  width: 2px; 
+  height: 10px; 
+  background-color: black; 
+  transform: translateX(-50%); 
 }
 
+
+
+/* days label */
 .day-label {
   position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: -20px;
   font-size: 12px;
+  color: #333;
+  white-space: wrap;
+  text-align: center;
+  margin-top: 4px;
+}
+
+
+span.hide {
+  opacity: 0;
+}
+
+
+
+.month-label {
+  position: absolute;
+  bottom: -60px; /* Coloca el mes más abajo */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+ 
 }
 
 .timeline-bar {
   position: absolute;
   top: 20px;
   height: 10px;
+  background-color: black;
 }
+
+
+
 
 .timeline-bar-booking {
-  background-color: blue;
+  background-color: #28a745;
 }
 
+
 .timeline-bar-travel {
-  background-color: lightblue;
+  background-color: #17a2b8; 
 }
 
 
 
 </style>
+
