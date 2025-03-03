@@ -26,12 +26,13 @@ const groupId = '01944aba-c972-71cf-8ece-d2b9bf2de93d';
 };
 
 const months = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dec"];
-
-const formatDateTimeline = (d: string | number | Date): string => {
+ 
+const formatDateTimeline = (d: string | number | Date, withMonth: boolean= false): string => {
   const date = new Date(d);
   const day = String(date.getDate()).padStart(2, '0');
   const monthAsString= months[date.getMonth()];
-  return `${day} ${monthAsString}`;
+  const format = withMonth ? `${day} ${monthAsString}` : `${day}`
+  return format;
 };
 
 
@@ -57,6 +58,7 @@ const sortedDates = computed(() => {
         label:
           'Días previos (' + travelPeriodPreviousDays + ')',
          date: new Date(new Date(bookingWindowStart.value).getTime() - travelPeriodPreviousDays.value * 24 * 60 * 60 * 1000),
+
       },
       
       {
@@ -109,48 +111,56 @@ const rangeOfDays = computed(() => {
   );
 
   uniqueRange.sort((a, b) => a.getTime() - b.getTime());
-  return uniqueRange.map(date => formatDateTimeline(date));
+  return uniqueRange.map( (date , index) => formatDateTimeline(date, index === uniqueRange.findIndex(d=> d.getMonth() === date.getMonth())));
+ 
+});
+
+
+
+
+const bookingStartPosition = computed(() => {
+  const firstDay = new Date(rangeOfDays.value[0]);  
+  const bookingStartDate = new Date(bookingWindowStart.value);
+
+  // Encuentra la posición de bookingWindowStart en rangeOfDays
+  const indexOfBookingStart = rangeOfDays.value.findIndex((date) => {
+    return date === formatDateTimeline(bookingStartDate); 
+  });
+
+  if (indexOfBookingStart === -1) return 0;
+  const position = (indexOfBookingStart / (rangeOfDays.value.length - 1)) * 100;
+  console.log(`Booking start position: ${position}%`);
+  return position;
+});
+
+
+
+const travelStartPosition = computed(() => {
+  const firstDay = new Date(rangeOfDays.value[0]);  
+  const travelStartDate = new Date(travelPeriodStart.value);  
+
+  const indexOfTravelStart = rangeOfDays.value.findIndex((date) => {
+    return date === formatDateTimeline(travelStartDate); 
+  });
+  console.log(indexOfTravelStart)
+
+  if (indexOfTravelStart === -1) return 0;  
+  const position = (indexOfTravelStart / (rangeOfDays.value.length - 1)) * 100;  
+  console.log(`Travel start position: ${position}%`);
+  return position;
+});
+
+
+  const travelWidth = computed(() => {
+  const totalDays = (new Date(travelPeriodEnd.value).getTime() - new Date(travelPeriodStart.value).getTime()) / (1000 * 3600 * 24);
+  const totalRange = rangeOfDays.value.length - 1;  
+  return (totalDays / totalRange) * 100;  
   
 });
 
-const formattedRangeOfDays = computed(() => {
-  return rangeOfDays.value.map((dateString: string, index: number, array: string[]) => {
-    const date = new Date(dateString); // Convertir string a Date
-    if (isNaN(date.getTime())) {
-      console.warn("Fecha inválida detectada:", dateString);
-      return null; // Si la fecha es inválida, evitamos errores
-    }
 
-    return {
-      day: date.getDate(), // Número del día
-      month: date.toLocaleString('es-ES', { month: 'long' }), // Mes en español
-      position: (index / (array.length - 1)) * 100 // Posición en porcentaje
-    };
-  }).filter(Boolean); // Filtramos valores nulos
-});
-
-
-const isFirstDayOfMonth = (index: number): boolean => {
-  if (index === 0) return true; // Siempre mostrar el primer mes
-  return (
-    formattedRangeOfDays.value[index].month !==
-    formattedRangeOfDays.value[index - 1].month
-  );
-};
-
-// Calcular la posición de la barra de la reserva (día de la reserva)
-const bookingStartPosition = computed(() => {
-  const totalDays = (new Date(travelPeriodEnd.value).getTime() - new Date(bookingWindowStart.value).getTime()) / (1000 * 3600 * 24);
-  const offsetDays = (new Date(bookingWindowStart.value).getTime() - new Date(bookingWindowStart.value).getTime()) / (1000 * 3600 * 24);
-  return (offsetDays / totalDays) * 100;
-});
-
-// Calcular la posición de la barra del viaje (días de viaje)
-const travelStartPosition = computed(() => {
-  const totalDays = (new Date(travelPeriodEnd.value).getTime() - new Date(bookingWindowStart.value).getTime()) / (1000 * 3600 * 24);
-  const offsetDays = (new Date(travelPeriodStart.value).getTime() - new Date(bookingWindowStart.value).getTime()) / (1000 * 3600 * 24);
-  return (offsetDays / totalDays) * 100;
-});
+console.log('Booking start position:', bookingStartPosition.value);
+console.log('Travel start position:', travelStartPosition.value);
 
 
 
@@ -163,9 +173,7 @@ const travelStartPosition = computed(() => {
 <template>
 
 <div class="timeline-container">
-  <!-- Línea de tiempo -->
   <div class="timeline-line">
-    <!-- Iterar sobre los días de la línea de tiempo -->
     <div 
       v-for="(day, index) in rangeOfDays" 
       :key="index" 
@@ -178,35 +186,21 @@ const travelStartPosition = computed(() => {
   {{ day }}
 </span>
     </div>
+  </div> 
 
-    <!-- Contenedor de los meses -->
-    <div class="timeline-months">
-      <div 
-        v-for="(day, index) in formattedRangeOfDays " 
-        :key="'month-' + index"
-        v-if="isFirstDayOfMonth(0)"
-        class="month-label"
-        :style="{ left: day.position + '%' }"
-      >
-        {{ day.month }}
-      </div>
-    </div>
-  </div> <!-- Cierre correcto de .timeline-line -->
-
-  <!-- Barra de la reserva -->
   <div 
     v-if="bookingWindowStart" 
     class="timeline-bar timeline-bar-booking" 
-    :style="{ left: bookingStartPosition + '%' }"
-  ></div>
+    :style="{ left: bookingStartPosition + '%', width:'2%' }"
+  >
+Reserva</div>
 
-  <!-- Barra del viaje -->
   <div 
     v-if="travelPeriodStart" 
     class="timeline-bar timeline-bar-travel" 
-    :style="{ left: travelStartPosition + '%', width:  + '%' }"
-  ></div>
-</div> <!-- Cierre correcto de .timeline-container -->
+    :style="{ left: travelStartPosition + '%', width: travelWidth + '%'  }"
+  > Viaje</div>
+</div> 
 
 
 
@@ -232,22 +226,23 @@ const travelStartPosition = computed(() => {
 .timeline-container {
   position: relative;
   width: 100%;
-  height: 100px;
+  height: 150px;
   padding: 20px;
   background-color: #f0f0f0;
 }
 
 
 .timeline-line {
-  position: absolute;
+  position: relative;
   top: 50%;
   width: 70%;
-  height: 5px;
+  height: 6px;
   background-color: black;
   transform: translateY(-50%);
   display: flex;
   justify-content: space-between;
   padding: 0 10px;
+  border-radius: 5px;
 }
 
 /* rayas */
@@ -284,7 +279,7 @@ span.hide {
 
 .month-label {
   position: absolute;
-  bottom: -60px; /* Coloca el mes más abajo */
+  bottom: -60px; 
   left: 50%;
   transform: translateX(-50%);
   font-size: 14px;
@@ -295,9 +290,13 @@ span.hide {
 
 .timeline-bar {
   position: absolute;
-  top: 20px;
+  top: 60px;
   height: 10px;
   background-color: black;
+  width: 10px; 
+  z-index: 1;
+  border-radius: 4px;
+
 }
 
 
@@ -309,7 +308,12 @@ span.hide {
 
 
 .timeline-bar-travel {
-  background-color: #17a2b8; 
+  
+  background-color: #17a2b8;
+  top: 60px; 
+  left: 76%;
+  
+ 
 }
 
 
