@@ -1,0 +1,205 @@
+{
+    "dates": {
+      "bookingWindowStart":"2025-02-25T00:00:00.000Z",
+      "bookingWindowEnd":"2025-02-27T00:00:00.000Z",
+      "travelPeriodStart":"2025-02-27T00:00:00.000Z",
+      "travelPeriodEnd":"2025-02-28T00:00:00.000Z",
+      "travelPeriodPreviousDays":"2"
+      ,"travelPeriodPostDays":"2"
+      ,"minStay":"1"
+      ,"releases":"1"
+    },
+    "splitPayment": { 
+      "firstPaymentFee":"50",
+      "idPaymentFeeType":1,
+      "lastPaymentFeeDate":"2025-02-26T00:00:00.000Z"
+    },
+    "promotions":[
+      {
+        "type":0,
+       "promoCode":"TESTCODE",
+       "count":"2"
+      }
+    ],
+    "meetingPlanner": {
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "name": "name",
+    "email": "mp@mp.es",
+    "status": true,
+    "account": "account"
+  },
+    "hotels":[
+      {
+       "id":"283",
+       "name":"Iberostar Selection Holguín",
+       "isRateVAT":true,
+       "rate":{
+         "id":1636,
+         "name":"TARIFA TEST XXXX",
+         "rooms":[
+           {
+             "name":"Suite premium",
+             "id":"dr",
+             "quotas":[
+               {
+                 "endDate":"2025-02-28T00:00:00.000Z",
+                 "startDate":"2025-02-27T00:00:00.000Z",
+                 "quantity":2
+               }
+             ]
+           },
+           {
+             "name":"Suite junior",
+             "id":"jr",
+             "quotas":[
+               {
+                 "endDate":"2025-02-28T00:00:00.000Z",
+                 "startDate":"2025-02-27T00:00:00.000Z",
+                 "quantity":2
+               }
+             ]
+           },
+           {
+             "name":"Double executive",
+             "id":"be",
+             "quotas":[
+               {
+                 "endDate":"2025-02-28T00:00:00.000Z",
+                 "startDate":"2025-02-27T00:00:00.000Z",
+                 "quantity":2
+               }
+             ]
+           },
+           {
+             "name":"Doble superior",
+             "id":"tg",
+             "quotas":[
+               {
+                 "endDate":"2025-02-28T00:00:00.000Z",
+                 "startDate":"2025-02-27T00:00:00.000Z",
+                 "quantity":2
+               }
+             ]
+           },
+           {
+             "name":"Doble básica",
+             "id":"bg",
+             "quotas":[
+               {
+                 "endDate":"2025-02-28T00:00:00.000Z",
+                 "startDate":"2025-02-27T00:00:00.000Z",
+                 "quantity":2
+               }
+             ]
+           }
+         ]
+       },
+        "promoOffers":[
+          {
+            "name":"ON_OFERTA EMPLEADOS 40%_PARTNER 25 LINEAL",
+            "idPromo":"194321",
+            "type":0
+          },
+          {
+            "name":"ON_EST_Partner Agentpro 25%",
+            "idPromo":"194423",
+            "type":0
+          }
+        ]
+      },
+      {
+        "id":"24",
+        "name":"Iberostar Selection Anthelia",
+        "isRateVAT":true,
+        "rate":
+        {
+          "id":2993,
+          "name":"TARIFA TEST XXXX",
+          "rooms":[
+            {
+              "name":"Suite premium",
+              "id":"dr",
+              "quotas":[
+                {
+                  "endDate":"2025-02-28T00:00:00.000Z",
+                 "startDate":"2025-02-27T00:00:00.000Z",
+                 "quantity":2
+                }
+              ]
+            },
+            {
+              "name":"Suite junior",
+              "id":"jr",
+              "quotas":[
+                {
+                  "endDate":"2025-02-28T00:00:00.000Z",
+                  "startDate":"2025-02-27T00:00:00.000Z",
+                  "quantity":2
+                }
+              ]
+            },
+            {
+              "name":"Double executive",
+              "id":"be",
+              "quotas":[
+                {
+                  "endDate":"2025-02-28T00:00:00.000Z",
+                  "startDate":"2025-02-27T00:00:00.000Z",
+                  "quantity":2
+                }
+              ]
+            },
+            {
+              "name":"Doble superior",
+              "id":"tg",
+              "quotas":[
+                {
+                  "endDate":"2025-02-28T00:00:00.000Z",
+                  "startDate":"2025-02-27T00:00:00.000Z",
+                  "quantity":2
+                }
+              ]
+            },
+            {
+              "name":"Doble básica",
+              "id":"bg",
+              "quotas":[
+                {
+                  "endDate":"2025-02-28T00:00:00.000Z",
+                  "startDate":"2025-02-27T00:00:00.000Z",
+                  "quantity":2
+                }
+              ]
+            }
+          ]
+        },
+        "promoOffers":[
+          {
+            "name":"ON_OFERTA FAMILIARES PRIMER GRADO 30%",
+            "idPromo":"194322",
+            "type":0
+          },
+          {
+            "name":"ON_EST_Airbus 20%",
+            "idPromo":"194323",
+            "type":0
+          }
+        ]
+      }
+    ], 
+    "name":"Test",
+    "userName":"ALEX",
+    "idCompany":1,
+    "meetingPlannerId":"3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "idRateType":1,
+    "idType":1,
+    "idCountry":"GE",
+    "receiverInvoiceMails":"test@tes.com",
+    "adminNameIBH":"test",
+    "adminEmailIBH":"test@gmail.com",
+    "isMyRoom":true,
+    "landingPage" :null,
+    "thresholdValue":"75",
+    "idThresholdType":1,
+    "isPartialPayment":true
+  }

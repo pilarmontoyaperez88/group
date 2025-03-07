@@ -6,7 +6,7 @@ import GroupsView from './views/GroupsView.vue';
 
 <template>
   <div>
-    <H1>TIMELINE</H1>
+    
     <GroupsView/>
   </div>
   

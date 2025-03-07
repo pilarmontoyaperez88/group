@@ -1,7 +1,7 @@
-
+import type { UUID } from 'crypto';
 
 export interface GroupListDTO {
-  // id: UUID;
+  id: UUID;
   name: string;
   status: GroupStatusType;
   travelPeriodStart: Date;
