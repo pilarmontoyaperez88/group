@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import GroupsView from './views/GroupsView.vue';
+import PaymentHotels from './views/PaymentHotels.vue';
 
 
 </script>
 
 <template>
   <div>
-    
-    <GroupsView/>
+    <PaymentHotels/>
+    <!-- <GroupsView/> -->
   </div>
   
 </template>

@@ -1,29 +1,15 @@
 <script setup lang="ts">
-import { ref, markRaw} from 'vue'
-import { IberButton, IberCard, IberTabs, IberValueLabel } from 'iberostar-component-library';
+import { ref, markRaw } from 'vue'
+import { IberButton, IberCard, IberTabs, IberValueLabel, IberPanel } from 'iberostar-component-library';
 import TimeLine from '../components/TimeLine.vue';
 import type { Tab } from 'iberostar-component-library';
 import mockData from '../assets/data/mockData.json';
-
-
-// import { GroupStatusType } from '../types/groups';
-// import type { RateDTO, QuotaDTO } from '../types/groups';
-
 import FacturacionDetails from '../components/details/FacturacionDetails.vue';
 import TarifasDetails from '../components/details/TarifasDetails.vue';
 import HotelesDetails from '../components/details/HotelesDetails.vue';
 
-
-
 const data = ref(mockData);
 const dataHotel = ref(mockData.hotels);
-// const rates = ref();
-// const rooms = ref();
-
-// const props = defineProps<{
-//   id: string;
-// }>()
-
 
 const formatDate = (d: string | number | Date): string => {
 
@@ -34,7 +20,7 @@ const formatDate = (d: string | number | Date): string => {
   return `${day}/${month}/${year} `;
 };
 
-const countryNames = { // hay que añadir más paises, pero creo que en groups ya hay una funcion para esto.
+const countryNames = { 
   "ES": "España",
   "DE": "Alemania",
   "FR": "Francia",
@@ -70,52 +56,83 @@ const ThresholdTypes =
   2: 'Valor'
 }
 
-
-const tabs = ref<Tab[]>([
-    {
-      id: 'billing',
-      title: 'FACTURACIÓN',
-      component: markRaw(FacturacionDetails) ,
-      props: {
-      data: data.value, 
-      paymentFeeTypes: paymentFeeTypes, 
-      },
-      
+const panels = ref([
+  {
+    title: 'Facturación', component: markRaw(FacturacionDetails),
+    expanded: true, 
+    hideExpand: false, hideSwitch: true,
+    props: {
+      data: data.value,
+      paymentFeeTypes: paymentFeeTypes,
     },
-    {
-      id: 'rate',
-      title: 'TARIFAS',
-      component: markRaw(TarifasDetails),
-      props: {
+  },
+  {
+    title: 'TARIFAS', component: markRaw(TarifasDetails),
+    expanded: false, 
+    hideExpand: false, 
+    hideSwitch: true,
+    props: {
       data: data.value,
       ThresholdTypes: ThresholdTypes,
       rateTypes: rateTypes,
-      },
-      
     },
-    {
-      id: 'promos',
-      title: 'HOTELES', 
-      component: markRaw(HotelesDetails),
-      props: {
-      data: data.value, 
-      dataHotel: dataHotel.value, 
-      },          
+  },
+  {
+    title: 'HOTELES', component: markRaw(HotelesDetails),
+    expanded: false, 
+    hideExpand: false, hideSwitch: true,
+    props: {
+      data: data.value,
+      dataHotel: dataHotel.value,
     },
 
-  
-    
-  ]);
+  },
+]);
 
-  const getIsMyRoomText = (isMyRoom: boolean) => (isMyRoom ? 'Sí' : 'No');
+
+const tabs = ref<Tab[]>([
+  {
+    id: 'billing',
+    title: 'FACTURACIÓN',
+    component: markRaw(FacturacionDetails),
+    props: {
+      data: data.value,
+      paymentFeeTypes: paymentFeeTypes,
+    },
+
+  },
+  {
+    id: 'rate',
+    title: 'TARIFAS',
+    component: markRaw(TarifasDetails),
+    props: {
+      data: data.value,
+      ThresholdTypes: ThresholdTypes,
+      rateTypes: rateTypes,
+    },
+
+  },
+  {
+    id: 'promos',
+    title: 'HOTELES',
+    component: markRaw(HotelesDetails),
+    props: {
+      data: data.value,
+      dataHotel: dataHotel.value,
+    },
+  },
+
+
+
+]);
+
+
+
+const getIsMyRoomText = (isMyRoom: boolean) => (isMyRoom ? 'Sí' : 'No');
 </script>
 
 <template>
   <div class="background-container">
-
-
-
-
     <IberCard>
       <div class="container-group">
 
@@ -126,47 +143,44 @@ const tabs = ref<Tab[]>([
           <IberButton icon="delete" outlined text="Dar de baja" />
           <IberButton icon="upload" text="Publicar grupo" />
         </div>
-
-
-
-
       </div>
     </IberCard>
-
-    <hr/>
-
-
+    <hr />
     <IberCard>
-
       <div class="data-container">
         <IberValueLabel label="Pais" :value="getCountryName(data?.idCountry)" />
         <IberValueLabel label="Tipo de grupo" :value="groupTypeNames[data?.idType] || 'Desconocido'" />
         <IberValueLabel label="Nombre del comercial" :value="data?.adminNameIBH" />
         <IberValueLabel label="Email del comercial" :value="data?.adminEmailIBH" />
         <IberValueLabel label="Meeting planner" :value="data?.meetingPlanner?.name" />
-        
         <IberValueLabel label="My room" :value="getIsMyRoomText(data?.isMyRoom)">
-          
         </IberValueLabel>
-
         <IberValueLabel label="Web de landing" :value="data?.landingPage" />
       </div>
-      
     </IberCard>
-<hr/>
+    <hr />
+
+    
     <TimeLine />
-<hr/>
+    <hr />
 
     <IberTabs join :tabs="tabs" />
 
     
-
+      <IberPanel v-for="(panel, index) in panels" 
+      :key="index" 
+      :title="panel.title" 
+      :expand="panel.expanded"
+      :hide-expand="panel.hideExpand" 
+      :hide-switch="panel.hideSwitch">
+        <component :is="panel.component"
+        :data="panel.props.dataHotel" />
+      </IberPanel>
+    
   </div>
- </template>
+</template>
 
 <style scoped>
-
-
 .background-container {
   background-color: #BFE2FB;
   min-height: 100vh;
@@ -182,7 +196,6 @@ const tabs = ref<Tab[]>([
   width: 100%;
   max-width: 1200px;
   margin: 2px
-
 }
 
 .boton-container {
@@ -214,6 +227,4 @@ const tabs = ref<Tab[]>([
   margin-left: 35px;
 
 }
-
-
 </style>
